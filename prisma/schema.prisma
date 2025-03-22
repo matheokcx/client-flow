@@ -20,6 +20,10 @@ model User {
   sessions             Session[]
   resetToken           String?   @unique
   resetTokenExpires    DateTime?
+  freelances Freelance[]
+  agences Agency[]
+  author_messages      Message[] @relation("author")
+  target_messages      Message[] @relation("target")
 }
 
 model Account {
@@ -46,4 +50,83 @@ model VerificationToken {
   expires    DateTime
 
   @@id([identifier, token])
+}
+
+model Agency {
+  id              Int @id @default(autoincrement())
+  name            String
+  past_experience Boolean 
+  freelances      Freelance[]
+  projects        Project[]
+  user            User @relation(fields: [userid], references: [id], onDelete: Cascade)
+  userid          String
+  collaborations  Collaboration[]
+}
+
+enum EXPERIENCE_STATUS {
+  JUNIOR
+  EXPERIMENTE
+  SENIOR
+}
+
+enum SEXES {
+  MALE
+  FEMALE
+  NONE
+}
+
+model Freelance {
+  id                 Int @id @default(autoincrement())
+  last_name          String
+  first_name         String
+  description        String?
+  url               String?
+  sexe              SEXES
+  age               Int
+  profil_picture    String?
+  experience_level  EXPERIENCE_STATUS @default(EXPERIMENTE)
+  average_daily_rate Int @default(100)
+  prospects         Agency[]
+  projects          Project[]
+  user              User @relation(fields: [userid], references: [id], onDelete: Cascade)
+  userid            String
+  collaborations    Collaboration[]
+}
+
+model Project {
+  id          Int @id @default(autoincrement())
+  title       String
+  description String
+  startDate   DateTime
+  endDate     DateTime?
+  client      Agency @relation(fields: [clientid], references: [id], onDelete: Cascade)
+  clientid    Int
+  developers  Freelance[]
+}
+
+enum COLLAB_STATUS {
+  EN_ATTENTE
+  EN_COURS
+  TERMINEE
+  REFUSEE
+}
+
+model Collaboration {
+  id          String    @id @default(uuid())
+  freelance   Freelance @relation(fields: [freelanceId], references: [id], onDelete: Cascade)
+  freelanceId Int
+  agence      Agency    @relation(fields: [agenceId], references: [id], onDelete: Cascade)
+  agenceId    Int
+  status      COLLAB_STATUS @default(EN_ATTENTE)
+}
+
+model Message {
+  id        String @id @default(uuid())
+  text      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  author    User @relation("author", fields: [author_id], references: [id], onDelete: Cascade)
+  author_id String
+  target    User @relation("target", fields: [target_id], references: [id], onDelete: Cascade)
+  target_id String
 }

@@ -23,7 +23,7 @@ interface CustomSession extends Session {
     };
 };
 
-export const authConfig = {
+const authConfig = {
     adapter: PrismaAdapter(prisma),
     providers: [
         GoogleProvider({
